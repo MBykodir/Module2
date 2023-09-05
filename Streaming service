@@ -66,4 +66,23 @@ int main() {
     UserList* userList = createUserList();
 
     // Додавання користувачів
-    addUserToUserList(userList, "JohnDoe", "johndoe@example.com", "password
+    addUserToUserList(userList, "JohnDoe", "johndoe@example.com", "password123");
+    addUserToUserList(userList, "AliceSmith", "alice@example.com", "secret456");
+
+    // Виведення інформації про користувачів
+    for (int i = 0; i < userList->count; i++) {
+        User* user = userList->users[i];
+        printf("Username: %s\n", user->username);
+        printf("Email: %s\n", user->email);
+        printf("Password: %s\n", user->password);
+    }
+
+    // Звільнення пам'яті
+    for (int i = 0; i < userList->count; i++) {
+        free(userList->users[i]);
+    }
+    free(userList->users);
+    free(userList);
+
+    return 0;
+}
