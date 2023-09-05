@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // Структура для представлення медіа-елемента (фільму, музичного треку тощо)
 typedef struct {
@@ -14,93 +15,55 @@ typedef struct {
     char password[50]; // Пароль користувача
 } User;
 
-// Структура для представлення платежної інформації
-typedef struct {
-    char cardNumber[20]; // Номер кредитної/дебетової карти
-    char expirationDate[10]; // Термін дії карти (місяць/рік)
-    char cvv[4]; // CVV-код карти
-} PaymentInfo;
-
-// Структура для представлення підписки
-typedef struct {
-    char subscriptionType[20]; // Тип підписки (наприклад, "Преміум", "Стандарт" тощо)
-    float price; // Вартість підписки в доларах
-    int validityPeriod; // Термін дії підписки в днях
-} Subscription;
-
 // Функція для створення нового користувача
 User* createUser(const char* username, const char* email, const char* password) {
     User* user = (User*)malloc(sizeof(User));
+    if (user == NULL) {
+        return NULL;
+    }
     strcpy(user->username, username);
     strcpy(user->email, email);
     strcpy(user->password, password);
     return user;
 }
 
-// Функція для створення нового медіа-елемента
-MediaElement* createMediaElement(const char* title, int duration) {
-    MediaElement* element = (MediaElement*)malloc(sizeof(MediaElement));
-    strcpy(element->title, title);
-    element->duration = duration;
-    return element;
+// Структура для представлення списку користувачів
+typedef struct {
+    User** users;
+    int count;
+} UserList;
+
+// Функція для створення нового списку користувачів
+UserList* createUserList() {
+    UserList* userList = (UserList*)malloc(sizeof(UserList));
+    if (userList == NULL) {
+        return NULL;
+    }
+    userList->users = NULL;
+    userList->count = 0;
+    return userList;
 }
 
-// Функція для створення нової платежної інформації
-PaymentInfo* createPaymentInfo(const char* cardNumber, const char* expirationDate, const char* cvv) {
-    PaymentInfo* paymentInfo = (PaymentInfo*)malloc(sizeof(PaymentInfo));
-    strcpy(paymentInfo->cardNumber, cardNumber);
-    strcpy(paymentInfo->expirationDate, expirationDate);
-    strcpy(paymentInfo->cvv, cvv);
-    return paymentInfo;
-}
-
-// Функція для створення нової підписки
-Subscription* createSubscription(const char* subscriptionType, float price, int validityPeriod) {
-    Subscription* subscription = (Subscription*)malloc(sizeof(Subscription));
-    strcpy(subscription->subscriptionType, subscriptionType);
-    subscription->price = price;
-    subscription->validityPeriod = validityPeriod;
-    return subscription;
+// Функція для додавання користувача до списку користувачів
+int addUserToUserList(UserList* userList, const char* username, const char* email, const char* password) {
+    User* user = createUser(username, email, password);
+    if (user == NULL) {
+        return 0; // Помилка при створенні користувача
+    }
+    // Збільшимо розмір списку користувачів і додамо нового користувача
+    userList->count++;
+    userList->users = (User**)realloc(userList->users, sizeof(User*) * userList->count);
+    if (userList->users == NULL) {
+        return 0; // Помилка при реалокації пам'яті для списку користувачів
+    }
+    userList->users[userList->count - 1] = user;
+    return 1; // Успішно додано користувача
 }
 
 // Головна функція
 int main() {
-    // Створення користувача
-    User* user = createUser("JohnDoe", "johndoe@example.com", "password123");
+    // Створення списку користувачів
+    UserList* userList = createUserList();
 
-    // Створення медіа-елемента
-    MediaElement* mediaElement = createMediaElement("Movie Title", 120);
-
-    // Створення платежної інформації
-    PaymentInfo* paymentInfo = createPaymentInfo("1234567890123456", "12/25", "123");
-
-    // Створення підписки
-    Subscription* subscription = createSubscription("Premium", 9.99, 30);
-
-    // Виведення даних користувача
-    printf("Username: %s\n", user->username);
-    printf("Email: %s\n", user->email);
-    printf("Password: %s\n", user->password);
-
-    // Виведення даних медіа-елемента
-    printf("Media Title: %s\n", mediaElement->title);
-    printf("Duration: %d minutes\n", mediaElement->duration);
-
-    // Виведення даних платежної інформації
-    printf("Card Number: %s\n", paymentInfo->cardNumber);
-    printf("Expiration Date: %s\n", paymentInfo->expirationDate);
-    printf("CVV: %s\n", paymentInfo->cvv);
-
-    // Виведення даних підписки
-    printf("Subscription Type: %s\n", subscription->subscriptionType);
-    printf("Price: $%.2f\n", subscription->price);
-    printf("Validity Period: %d days\n", subscription->validityPeriod);
-
-    // Звільнення пам'яті
-    free(user);
-    free(mediaElement);
-    free(paymentInfo);
-    free(subscription);
-
-    return 0;
-}
+    // Додавання користувачів
+    addUserToUserList(userList, "JohnDoe", "johndoe@example.com", "password
