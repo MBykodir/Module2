@@ -15,6 +15,12 @@ typedef struct {
     char password[50]; // Пароль користувача
 } User;
 
+// Структура для представлення медіа-файлу
+typedef struct {
+    char filename[100]; // Назва файлу
+    MediaElement* media; // Вказівник на медіа-елемент
+} MediaFile;
+
 // Функція для створення нового користувача
 User* createUser(const char* username, const char* email, const char* password) {
     User* user = (User*)malloc(sizeof(User));
@@ -25,6 +31,32 @@ User* createUser(const char* username, const char* email, const char* password) 
     strcpy(user->email, email);
     strcpy(user->password, password);
     return user;
+}
+
+// Функція для створення нового медіа-елемента
+MediaElement* createMediaElement(const char* title, int duration) {
+    MediaElement* media = (MediaElement*)malloc(sizeof(MediaElement));
+    if (media == NULL) {
+        return NULL;
+    }
+    strcpy(media->title, title);
+    media->duration = duration;
+    return media;
+}
+
+// Функція для створення нового медіа-файлу
+MediaFile* createMediaFile(const char* filename, const char* title, int duration) {
+    MediaFile* mediaFile = (MediaFile*)malloc(sizeof(MediaFile));
+    if (mediaFile == NULL) {
+        return NULL;
+    }
+    strcpy(mediaFile->filename, filename);
+    mediaFile->media = createMediaElement(title, duration);
+    if (mediaFile->media == NULL) {
+        free(mediaFile);
+        return NULL;
+    }
+    return mediaFile;
 }
 
 // Структура для представлення списку користувачів
@@ -60,6 +92,16 @@ int addUserToUserList(UserList* userList, const char* username, const char* emai
     return 1; // Успішно додано користувача
 }
 
+// Функція для пошуку медіа-файлу за назвою
+MediaFile* searchMediaFileByTitle(MediaFile** mediaFiles, int count, const char* title) {
+    for (int i = 0; i < count; i++) {
+        if (strcmp(mediaFiles[i]->media->title, title) == 0) {
+            return mediaFiles[i];
+        }
+    }
+    return NULL; // Медіа-файл не знайдено
+}
+
 // Головна функція
 int main() {
     // Створення списку користувачів
@@ -69,20 +111,31 @@ int main() {
     addUserToUserList(userList, "JohnDoe", "johndoe@example.com", "password123");
     addUserToUserList(userList, "AliceSmith", "alice@example.com", "secret456");
 
-    // Виведення інформації про користувачів
-    for (int i = 0; i < userList->count; i++) {
-        User* user = userList->users[i];
-        printf("Username: %s\n", user->username);
-        printf("Email: %s\n", user->email);
-        printf("Password: %s\n", user->password);
+    // Створення медіа-файлів
+    MediaFile* mediaFiles[2];
+    mediaFiles[0] = createMediaFile("video1.mp4", "Video 1", 120);
+    mediaFiles[1] = createMediaFile("music1.mp3", "Music 1", 180);
+
+    // Пошук медіа-файлу за назвою
+    MediaFile* foundMediaFile = searchMediaFileByTitle(mediaFiles, 2, "Video 1");
+    if (foundMediaFile != NULL) {
+        printf("Found Media File: %s (Duration: %d minutes)\n", foundMediaFile->filename, foundMediaFile->media->duration);
+    } else {
+        printf("Media File not found.\n");
     }
 
-    // Звільнення пам'яті
+    // Звільнення пам'яті користувачів
     for (int i = 0; i < userList->count; i++) {
         free(userList->users[i]);
     }
     free(userList->users);
     free(userList);
+
+    // Звільнення пам'яті медіа-файлів
+    for (int i = 0; i < 2; i++) {
+        free(mediaFiles[i]->media);
+        free(mediaFiles[i]);
+    }
 
     return 0;
 }
